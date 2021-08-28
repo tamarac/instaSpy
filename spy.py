@@ -20,13 +20,6 @@ driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
 driver.get(config["DOMAIN"])
 
 def login():
-    time.sleep(2)
-    elems = driver.find_elements_by_css_selector("button.sqdOP.L3NKy.y3zKF")
-
-    for e in elems:
-        if e.text == "Entrar":
-            e.click()
-
     time.sleep(3)
     username = driver.find_element_by_name('username')
     username.clear()
@@ -84,7 +77,7 @@ def getInitialData():
         
         time.sleep(3)
         scrollDialog(numSeguidores)
-        
+        getListFollowers()
         closePopUp()
         getItemMenu(2)
         time.sleep(3)
@@ -119,5 +112,3 @@ def getInitialData():
         
         seguidores.clear()
         seguindo.clear()
-
-driver.close()
