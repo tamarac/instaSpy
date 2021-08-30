@@ -1,12 +1,13 @@
 
-from datetime import datetime
 import re
 import time
 import json
+import pandas as pd
+from datetime import datetime
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from webdriver_manager.firefox import GeckoDriverManager
 from dotenv import dotenv_values
+from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.support.wait import WebDriverWait
 
 config = dotenv_values(".env")
 today = datetime.today()
@@ -55,45 +56,49 @@ def getListFollowers():
         seguidores.append(item.text)
 
 def scrollDialog(number):
-    fBody  = driver.find_element_by_xpath("//div[@class='isgrP']")
+    fBody = WebDriverWait(driver, 2).until(lambda d: d.find_element_by_xpath("//div[@class='isgrP']"))
+    time.sleep(2)
     scroll = 0
-    while scroll < int(number):
-        driver.execute_script('arguments[0].scrollTop = arguments[0].scrollTop + arguments[0].offsetHeight;', fBody)
-        fList  = driver.find_elements_by_xpath("//div[@class='isgrP']//li")
-        scroll = int(len(fList))
+    while scroll < (int(number)/4):
+        driver.execute_script('arguments[0].scrollTop = arguments[0].scrollTop + (arguments[0].offsetHeight - 20);', fBody)
+        time.sleep(1)
+        driver.find_elements_by_xpath("//li.wo9IH")
+        scroll += 1
+       
 
 def getListFollowers():
     listaSeguidores = driver.find_elements_by_css_selector("a.FPmhX.notranslate._0imsa")
     for item in listaSeguidores:
         seguidores.append(item.text)
 
+def getListFollowins():
+    listaSeguindo = driver.find_elements_by_css_selector("a.FPmhX.notranslate._0imsa")
+    for item in listaSeguindo:
+        seguindo.append(item.text)
+
 def getInitialData():
+    df = pd.read_json(path_or_buf='data/dados.json', orient='table')
+    print(df)
     for vitima in vitimas:
         driver.get(config["DOMAIN"] + vitima +"/")
         itemsAnalisados = getItemMenu(1)
         numPosts = clearText(itemsAnalisados[0].text)
         numSeguidores = clearText(itemsAnalisados[1].text)
         numSeguindo = clearText(itemsAnalisados[2].text)
-        
         time.sleep(3)
+
         scrollDialog(numSeguidores)
         getListFollowers()
         closePopUp()
         getItemMenu(2)
         time.sleep(3)
+   
         scrollDialog(numSeguindo)
-        listaSeguindo = driver.find_elements_by_css_selector("a.FPmhX.notranslate._0imsa")
-        for item in listaSeguindo:
-            seguindo.append(item.text)
+        getListFollowins()
+        closePopUp() 
 
-        closePopUp()
         jsonData = {
-            vitima: { 
-            
-            }
-        }
-
-        jsonData[vitima] = {
+            "username": vitima,
             "posts": numPosts,
             "qntSeguidores": numSeguidores,
             "qntSeguindo": numSeguindo,
@@ -101,14 +106,11 @@ def getInitialData():
             "listaSeguindo": seguindo,
             "date": str(today)
         }
+       
+        df = df.append(jsonData, ignore_index=True)
+        result = df.to_json(path_or_buf='data/dados.json', orient="table")
 
-        with open('data/dados.json') as f:
-            data = json.load(f)
-
-        data.update(jsonData)
-
-        with open('data/dados.json', 'w') as f:
-            json.dump(data, f)
-        
+        parsed = json.loads(result)
+        json.dumps(parsed, indent=4) 
         seguidores.clear()
         seguindo.clear()
