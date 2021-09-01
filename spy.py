@@ -10,7 +10,7 @@ from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.support.wait import WebDriverWait
 
 config = dotenv_values(".env")
-today = datetime.today()
+today = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 regexClearText = r"\s.+"
 vitimas = config["SPY_ACCOUNTS"].split(',')
 
@@ -61,7 +61,7 @@ def scrollDialog(number):
     scroll = 0
     while scroll < (int(number)/4):
         driver.execute_script('arguments[0].scrollTop = arguments[0].scrollTop + (arguments[0].offsetHeight - 20);', fBody)
-        time.sleep(1)
+        time.sleep(3)
         driver.find_elements_by_xpath("//li.wo9IH")
         scroll += 1
        
@@ -77,8 +77,8 @@ def getListFollowins():
         seguindo.append(item.text)
 
 def getInitialData():
-    df = pd.read_json(path_or_buf='data/dados.json', orient='table')
-    print(df)
+    df = pd.read_json(path_or_buf='data/dados2.json', orient='table')
+ 
     for vitima in vitimas:
         driver.get(config["DOMAIN"] + vitima +"/")
         itemsAnalisados = getItemMenu(1)
@@ -104,13 +104,10 @@ def getInitialData():
             "qntSeguindo": numSeguindo,
             "listaSeguidores": seguidores,
             "listaSeguindo": seguindo,
-            "date": str(today)
+            "date": today
         }
        
         df = df.append(jsonData, ignore_index=True)
-        result = df.to_json(path_or_buf='data/dados.json', orient="table")
-
-        parsed = json.loads(result)
-        json.dumps(parsed, indent=4) 
+        df.to_json(path_or_buf='data/dados2.json', orient="table")
         seguidores.clear()
         seguindo.clear()
