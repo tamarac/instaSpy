@@ -1,15 +1,18 @@
 import pandas as pd
 from dotenv import dotenv_values
+from datetime import datetime
 
 config = dotenv_values(".env")
 usersSpy = config["SPY_ACCOUNTS"].split(',')
-dados = pd.read_json("data/dados.json", orient='table')
-
+dados = pd.read_json("data/dados2.json", orient='table')
+today = pd.to_datetime(datetime.today(), format='%Y-%m-%d %H:%M:%S') 
+print(today)
 for user in usersSpy:
     userData = dados.loc[dados['username'] == user, ['qntSeguidores', 'qntSeguindo', 'posts', 'date']]
     for index, user in userData.iterrows():
-        user['date'] = pd.to_datetime(user['date'], utc=True)
-        ordenado = userData.sort_values(by=["date"], ascending=False)
-        filter = ordenado.loc['qntSeguidores', 'qntSeguindo', 'posts']
+        user['date'] = pd.to_datetime(user.date, format='%Y-%m-%d %H:%M:%S')
+   
+        filter = userData[today - pd.offsets.Day(1):]
+
     #diference = filter.diff(axis=1)
-    #print(diference)
+        print(filter)
