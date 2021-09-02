@@ -10,7 +10,8 @@ from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.support.wait import WebDriverWait
 
 config = dotenv_values(".env")
-today = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+today = pd.to_datetime(datetime.now(), format='%Y-%m-%d %H:%M:%S')
+print(today)
 regexClearText = r"\s.+"
 vitimas = config["SPY_ACCOUNTS"].split(',')
 
@@ -99,9 +100,9 @@ def getInitialData():
 
         jsonData = {
             "username": vitima,
-            "posts": numPosts,
-            "qntSeguidores": numSeguidores,
-            "qntSeguindo": numSeguindo,
+            "posts": int(numPosts),
+            "qntSeguidores": int(numSeguidores),
+            "qntSeguindo": int(numSeguindo),
             "listaSeguidores": seguidores,
             "listaSeguindo": seguindo,
             "date": today
@@ -111,3 +112,4 @@ def getInitialData():
         df.to_json(path_or_buf='data/dados2.json', orient="table")
         seguidores.clear()
         seguindo.clear()
+    driver.close()
