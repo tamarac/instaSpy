@@ -11,7 +11,8 @@ for user in usersSpy:
     today = datetime.today()
     days = timedelta(days=2)
     start_date, end_date = (today - days), today
-    filterByDate = dados[dados['date'] >= start_date].sort_values(by=["date"], ascending=False).head(2)
+    filterByDate = dados.loc[(dados['date'] >= start_date) & (dados['username'] == user)].sort_values(by=["date"], ascending=False).head(2)
+    print(filterByDate)
     # comparando os seguidores
     filterSeguidores = list(filterByDate.listaSeguidores)
     diffListaSeguidores = set(filterSeguidores[0]) - set(filterSeguidores[1])

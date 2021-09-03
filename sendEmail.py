@@ -11,6 +11,8 @@ port = 587  # For starttls
 sender_email = config['EMAIL_SENDER']
 password = config['EMAIL_PASSWORD']
 receiver_email = config['EMAIL_RECEIVE']
+smtp = config['SMTP']
+port = config['PORT']
 
 message = MIMEMultipart("alternative")
 message["Subject"] = "Alterações"
@@ -34,7 +36,7 @@ def send(listFollowers, listFollowins, newFollowers, newFollowins, user):
 
     if (newFollowers or newFollowins):
         context = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.kinghost.net", 465, context=context) as server:
+        with smtplib.SMTP_SSL(smtp, port, context=context) as server:
             server.login(sender_email, password)
             server.sendmail(
                 sender_email, receiver_email, message.as_string()
