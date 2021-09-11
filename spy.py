@@ -78,7 +78,7 @@ def getListFollowins():
         seguindo.append(item.text)
 
 def getInitialData():
-    df = pd.read_json(path_or_buf='data/dados2.json', orient='table')
+    df = pd.read_json(path_or_buf='data/dados.json', orient='table')
  
     for vitima in vitimas:
         driver.get(config["DOMAIN"] + vitima +"/")
@@ -109,7 +109,7 @@ def getInitialData():
         }
        
         df = df.append(jsonData, ignore_index=True)
-        df.to_json(path_or_buf='data/dados2.json', orient="table")
+        df.to_json(path_or_buf='data/dados.json', orient="table")
         seguidores.clear()
         seguindo.clear()
     driver.close()

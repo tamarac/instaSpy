@@ -4,24 +4,20 @@ from datetime import datetime, timedelta
 from sendEmail import send
 config = dotenv_values(".env")
 usersSpy = config["SPY_ACCOUNTS"].split(',')
-dados = pd.read_json("data/dados2.json", orient='table')
+dados = pd.read_json("data/dados.json", orient='table')
 
 for user in usersSpy:
     dados['date'] = pd.to_datetime(dados.date, format='%Y-%m-%d %H:%M:%S')
     today = datetime.today()
     days = timedelta(days=2)
     start_date, end_date = (today - days), today
-    filterByDate = dados.loc[(dados['date'] >= start_date) & (dados['username'] == user)].sort_values(by=["date"], ascending=False).head(2)
-    print(filterByDate)
+    filterByDate = dados.loc[(dados['date'] >= start_date) & (dados['username'] == user)].sort_values(by=["date"], ascending=False).head(2).reset_index()
+    
     # comparando os seguidores
-    filterSeguidores = list(filterByDate.listaSeguidores)
-    diffListaSeguidores = set(filterSeguidores[0]) - set(filterSeguidores[1])
-    # comparando os seguindo
-    filterSeguindo = list(filterByDate.listaSeguindo)
-    diffListaSeguindo = set(filterSeguindo[0]) - set(filterSeguindo[1])
+    diffListaSeguidores = set(filterByDate.iloc[0].listaSeguidores) - set(filterByDate.iloc[1].listaSeguidores)
+    diffListaSeguindo =set(filterByDate.iloc[0].listaSeguindo) - set(filterByDate.iloc[1].listaSeguindo)
 
-    dadosLista = filterByDate.to_dict(orient='records')
-    novosSeguindo = dadosLista[0]['qntSeguindo'] > dadosLista[1]['qntSeguindo']
-    novosSeguidores = dadosLista[0]['qntSeguidores'] > dadosLista[1]['qntSeguidores']
-
+    novosSeguindo = filterByDate.iloc[0].qntSeguindo > filterByDate.iloc[1].qntSeguindo
+    novosSeguidores = filterByDate.iloc[0].qntSeguidores > filterByDate.iloc[1].qntSeguidores
+ 
     send(diffListaSeguidores, diffListaSeguindo , novosSeguidores, novosSeguindo, user)
