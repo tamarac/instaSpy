@@ -51,11 +51,6 @@ def closePopUp():
     close = driver.find_elements_by_css_selector(".QBdPU")
     close[1].click()
 
-def getListFollowers():
-    listaSeguidores = driver.find_elements_by_css_selector("a.FPmhX.notranslate._0imsa")
-    for item in listaSeguidores:
-        seguidores.append(item.text)
-
 def scrollDialog(number):
     fBody = WebDriverWait(driver, 2).until(lambda d: d.find_element_by_xpath("//div[@class='isgrP']"))
     time.sleep(2)
@@ -65,7 +60,6 @@ def scrollDialog(number):
         time.sleep(3)
         driver.find_elements_by_xpath("//li.wo9IH")
         scroll += 1
-       
 
 def getListFollowers():
     listaSeguidores = driver.find_elements_by_css_selector("a.FPmhX.notranslate._0imsa")
