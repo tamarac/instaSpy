@@ -11,12 +11,12 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 config = dotenv_values(".env")
 today = pd.to_datetime(datetime.now(), format='%Y-%m-%d %H:%M:%S')
-print(today)
-regexClearText = r"\s.+"
-vitimas = config["SPY_ACCOUNTS"].split(',')
 
-seguidores = []
-seguindo = []
+regexClearText = r"\s.+"
+accounts = config["SPY_ACCOUNTS"].split(',')
+
+followers = []
+followins = []
 
 driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
 driver.get(config["DOMAIN"])
@@ -28,24 +28,24 @@ def login():
     username.send_keys(config['INSTA_ACCOUNT'])
     password = driver.find_element_by_name('password')
     password.send_keys(config['INSTA_PASSWORD'])
-    entrar = driver.find_elements_by_css_selector("button.sqdOP.L3NKy.y3zKF")
+    login = driver.find_elements_by_css_selector("button.sqdOP.L3NKy.y3zKF")
 
-    for e in entrar:
+    for e in login:
         if e.text == "Entrar":
             e.click()
 
     time.sleep(3)
-    agrNao = driver.find_elements_by_link_text("button.sqdOP.yWX7d.y3zKF")
-    for e in agrNao:
+    notNow = driver.find_elements_by_link_text("button.sqdOP.yWX7d.y3zKF")
+    for e in notNow:
         e.click()
 
 def clearText(text):
     return re.sub(regexClearText, "", text, 0, re.MULTILINE)
 
 def getItemMenu(i):
-    itemsAnalisados = driver.find_elements_by_css_selector("li.Y8-fY")
-    itemsAnalisados[i].click()
-    return itemsAnalisados
+    analyzedItems = driver.find_elements_by_css_selector("li.Y8-fY")
+    analyzedItems[i].click()
+    return analyzedItems
 
 def closePopUp():
     close = driver.find_elements_by_css_selector(".QBdPU")
@@ -62,48 +62,48 @@ def scrollDialog(number):
         scroll += 1
 
 def getListFollowers():
-    listaSeguidores = driver.find_elements_by_css_selector("a.FPmhX.notranslate._0imsa")
-    for item in listaSeguidores:
-        seguidores.append(item.text)
+    listFollowers = driver.find_elements_by_css_selector("a.FPmhX.notranslate._0imsa")
+    for item in listFollowers:
+        followers.append(item.text)
 
 def getListFollowins():
-    listaSeguindo = driver.find_elements_by_css_selector("a.FPmhX.notranslate._0imsa")
-    for item in listaSeguindo:
-        seguindo.append(item.text)
+    listFollowins = driver.find_elements_by_css_selector("a.FPmhX.notranslate._0imsa")
+    for item in listFollowins:
+        followins.append(item.text)
 
 def getInitialData():
     df = pd.read_json(path_or_buf='data/dados.json', orient='table')
  
-    for vitima in vitimas:
-        driver.get(config["DOMAIN"] + vitima +"/")
-        itemsAnalisados = getItemMenu(1)
-        numPosts = clearText(itemsAnalisados[0].text)
-        numSeguidores = clearText(itemsAnalisados[1].text)
-        numSeguindo = clearText(itemsAnalisados[2].text)
+    for account in accounts:
+        driver.get(config["DOMAIN"] + account +"/")
+        analyzedItems = getItemMenu(1)
+        numPosts = clearText(analyzedItems[0].text)
+        numfollowers = clearText(analyzedItems[1].text)
+        numfollowins = clearText(analyzedItems[2].text)
         time.sleep(3)
 
-        scrollDialog(numSeguidores)
+        scrollDialog(numfollowers)
         getListFollowers()
         closePopUp()
         getItemMenu(2)
         time.sleep(3)
    
-        scrollDialog(numSeguindo)
+        scrollDialog(numfollowins)
         getListFollowins()
-        closePopUp() 
+        closePopUp()
 
         jsonData = {
-            "username": vitima,
+            "username": account,
             "posts": int(numPosts),
-            "qntSeguidores": int(numSeguidores),
-            "qntSeguindo": int(numSeguindo),
-            "listaSeguidores": seguidores,
-            "listaSeguindo": seguindo,
+            "numberFollowers": int(numfollowers),
+            "numberFollowins": int(numfollowins),
+            "listFollowers": followers,
+            "listFollowins": followins,
             "date": today
         }
        
         df = df.append(jsonData, ignore_index=True)
         df.to_json(path_or_buf='data/dados.json', orient="table")
-        seguidores.clear()
-        seguindo.clear()
+        followers.clear()
+        followins.clear()
     driver.close()

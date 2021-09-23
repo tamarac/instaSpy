@@ -1,10 +1,11 @@
 import pandas as pd
 from dotenv import dotenv_values
-from datetime import datetime, timedelta
 from sendEmail import send
+
 config = dotenv_values(".env")
 usersSpy = config["SPY_ACCOUNTS"].split(',')
-dados = pd.read_json("data/dados.json", orient='table')
+data = pd.read_json("data/dados.json", orient='table')
+
 def winOrLose(now, ago):
     return now - ago
 def diffUsers(count, registerNow, registerAgo):
@@ -15,15 +16,15 @@ def diffUsers(count, registerNow, registerAgo):
     return 0
     
 for user in usersSpy:
-    dados['date'] = pd.to_datetime(dados.date, format='%Y-%m-%d %H:%M:%S')
-    filterByDate = dados.loc[(dados['username'] == user)].sort_values(by=["date"], ascending=False).head(2).reset_index()
+    data['date'] = pd.to_datetime(data.date, format='%Y-%m-%d %H:%M:%S')
+    filterByDate = data.loc[(data['username'] == user)].sort_values(by=["date"], ascending=False).head(2).reset_index()
 
     # comparando os seguidores
 
-    changeFollowins = winOrLose(filterByDate.iloc[0].qntSeguindo, filterByDate.iloc[1].qntSeguindo)
-    changeFollowers = winOrLose(filterByDate.iloc[0].qntSeguidores, filterByDate.iloc[1].qntSeguidores)
+    changeFollowins = winOrLose(filterByDate.iloc[0].numberFollowins, filterByDate.iloc[1].numberFollowins)
+    changeFollowers = winOrLose(filterByDate.iloc[0].numberFollowers, filterByDate.iloc[1].numberFollowers)
 
-    diffListaSeguidores = diffUsers(changeFollowers, filterByDate.iloc[0].listaSeguidores, filterByDate.iloc[1].listaSeguidores)
-    diffListaSeguindo = diffUsers(changeFollowins, filterByDate.iloc[0].listaSeguindo, filterByDate.iloc[1].listaSeguindo)
-    print(diffListaSeguidores, diffListaSeguindo)
-    #send(diffListaSeguidores, diffListaSeguindo , changeFollowers, changeFollowins, user)
+    diffListFollowers = diffUsers(changeFollowers, filterByDate.iloc[0].listFollowers, filterByDate.iloc[1].listFollowers)
+    diffListFollowins = diffUsers(changeFollowins, filterByDate.iloc[0].listFollowins, filterByDate.iloc[1].listFollowins)
+
+    send(diffListFollowers, diffListFollowins, changeFollowers, changeFollowins, user)
