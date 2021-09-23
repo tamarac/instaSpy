@@ -20,24 +20,35 @@ message["From"] = sender_email
 message["To"] = receiver_email
 
 def send(listFollowers, listFollowins, newFollowers, newFollowins, user):
+    followins = """ """
+    followers = """ """
     html  = """
     <html>
     <body>
         <p>Olá<br>
-        Há novas atualizações de """ + user + """:<br>
-        Começou a seguir:""" + str(listFollowins) + """ <br>
-        Começou a ser seguido por:""" + str(listFollowers) + """ </p>
-    </body>
+        Há novas atualizações de """ + user + """:<br>"""
+    if newFollowins > 0:
+       followins = """Começou a seguir:""" + str(listFollowins) + """ <br>"""
+    elif newFollowins < 0:
+       followins = """Deixou de seguir:""" + str(listFollowins) + """ <br>"""
+    
+    if newFollowins > 0:
+       followers = """Começou a ser seguido por:""" + str(listFollowers) + """ </p>"""
+    elif newFollowins < 0:
+       followers = """Diexou de ser seguido por:""" + str(listFollowers) + """ </p>"""
+
+    fim = """</body>
     </html>
     """
-  
-    part2 = MIMEText(html, "html")
+    completeHtml = html + followins + followers + fim
+    part2 = MIMEText(completeHtml, "html")
     message.attach(part2)
-
-    if (newFollowers or newFollowins):
+   
+    if (newFollowers != 0 or newFollowins != 0):      
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL(smtp, port, context=context) as server:
             server.login(sender_email, password)
             server.sendmail(
                 sender_email, receiver_email, message.as_string()
             )
+            print("enviou")
