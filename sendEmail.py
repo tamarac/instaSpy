@@ -32,9 +32,9 @@ def send(listFollowers, listFollowins, newFollowers, newFollowins, user):
     elif newFollowins < 0:
        followins = """Deixou de seguir:""" + str(listFollowins) + """ <br>"""
     
-    if newFollowins > 0:
+    if newFollowers > 0:
        followers = """Começou a ser seguido por:""" + str(listFollowers) + """ </p>"""
-    elif newFollowins < 0:
+    elif newFollowers < 0:
        followers = """Diexou de ser seguido por:""" + str(listFollowers) + """ </p>"""
 
     fim = """</body>
@@ -51,4 +51,3 @@ def send(listFollowers, listFollowins, newFollowers, newFollowins, user):
             server.sendmail(
                 sender_email, receiver_email, message.as_string()
             )
-            print("enviou")
