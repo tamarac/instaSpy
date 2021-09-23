@@ -16,10 +16,7 @@ def diffUsers(count, registerNow, registerAgo):
     
 for user in usersSpy:
     dados['date'] = pd.to_datetime(dados.date, format='%Y-%m-%d %H:%M:%S')
-    today = datetime.today()
-    days = timedelta(days=2)
-    start_date, end_date = (today - days), today
-    filterByDate = dados.loc[(dados['date'] >= start_date) & (dados['username'] == user)].sort_values(by=["date"], ascending=False).head(2).reset_index()
+    filterByDate = dados.loc[(dados['username'] == user)].sort_values(by=["date"], ascending=False).head(2).reset_index()
 
     # comparando os seguidores
 
@@ -28,5 +25,5 @@ for user in usersSpy:
 
     diffListaSeguidores = diffUsers(changeFollowers, filterByDate.iloc[0].listaSeguidores, filterByDate.iloc[1].listaSeguidores)
     diffListaSeguindo = diffUsers(changeFollowins, filterByDate.iloc[0].listaSeguindo, filterByDate.iloc[1].listaSeguindo)
-
-    send(diffListaSeguidores, diffListaSeguindo , changeFollowers, changeFollowins, user)
+    print(diffListaSeguidores, diffListaSeguindo)
+    #send(diffListaSeguidores, diffListaSeguindo , changeFollowers, changeFollowins, user)
