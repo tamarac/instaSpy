@@ -72,19 +72,6 @@ def getDataFollowers(numfollowers):
             for user in r['users']:
                 followers.append(user['username'])
 
-def getDataFollowing(numfollowing):
-    substitution = "?count=" + numfollowing + "&"
-    for request in driver.requests:
-        if request.response and re.search(regex, request.url):
-            url = request.url
-            newUrl = re.sub(regexExtract, substitution, url, 0, re.MULTILINE)
-            headers = request.headers
-            cookies =transformData(driver.get_cookies())
-            r = requests.get(newUrl, data=[], headers=headers, cookies=cookies).json()
-            print(len(r['users']))
-            for user in r['users']:
-                followers.append(user['username'])
-
 def scrollDialog(number):
     fBody = WebDriverWait(driver, 2).until(lambda d: d.find_element_by_xpath("//div[@class='isgrP']"))
     time.sleep(2)
