@@ -4,11 +4,15 @@ import time
 import json
 import pandas as pd
 from datetime import datetime
-from selenium import webdriver
+import requests
+from seleniumwire import webdriver 
 from dotenv import dotenv_values
 from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.support.wait import WebDriverWait
+import re
 
+regex = r"https:\/\/i\.instagram\.com\/api\/v1\/friendships\/\d+\/"
+regexExtract = r"\?count=\d+&"
 config = dotenv_values(".env")
 today = pd.to_datetime(datetime.now(), format='%Y-%m-%d %H:%M:%S')
 
@@ -48,8 +52,38 @@ def getItemMenu(i):
     return analyzedItems
 
 def closePopUp():
-    close = driver.find_elements_by_css_selector(".QBdPU")
+    close = driver.find_elements_by_css_selector(".WaOAr")
     close[1].click()
+
+def transformData(data):
+    result = {}
+    for item in data:
+        result[item['name']] = item['value']
+def getDataFollowers(numfollowers):
+    substitution = "?count=" + numfollowers + "&"
+    for request in driver.requests:
+        if request.response and re.search(regex, request.url):
+            url = request.url
+            newUrl = re.sub(regexExtract, substitution, url, 0, re.MULTILINE)
+            headers = request.headers
+            cookies =transformData(driver.get_cookies())
+            r = requests.get(newUrl, data=[], headers=headers, cookies=cookies).json()
+            print(len(r['users']))
+            for user in r['users']:
+                followers.append(user['username'])
+
+def getDataFollowing(numfollowing):
+    substitution = "?count=" + numfollowing + "&"
+    for request in driver.requests:
+        if request.response and re.search(regex, request.url):
+            url = request.url
+            newUrl = re.sub(regexExtract, substitution, url, 0, re.MULTILINE)
+            headers = request.headers
+            cookies =transformData(driver.get_cookies())
+            r = requests.get(newUrl, data=[], headers=headers, cookies=cookies).json()
+            print(len(r['users']))
+            for user in r['users']:
+                followers.append(user['username'])
 
 def scrollDialog(number):
     fBody = WebDriverWait(driver, 2).until(lambda d: d.find_element_by_xpath("//div[@class='isgrP']"))
@@ -81,9 +115,7 @@ def getInitialData():
         numfollowers = clearText(analyzedItems[1].text)
         numfollowins = clearText(analyzedItems[2].text)
         time.sleep(3)
-
-        scrollDialog(numfollowers)
-        getListFollowers()
+        getDataFollowers(numfollowers)
         closePopUp()
         getItemMenu(2)
         time.sleep(3)
